@@ -143,9 +143,8 @@ public class MarketEmulator extends SwingWorker<Void, Bar> {
 					// publish bar as a swing worker result
 					publish(bar);
 
-					// Delay before next bar
+					// Delay before next bar if first bars already passed
 					int intervalMillis = settings.getTickIntervalSeconds() * 1000;
-
 					if (intervalMillis > 0) {
 						Thread.sleep(intervalMillis);
 					}
@@ -181,7 +180,7 @@ public class MarketEmulator extends SwingWorker<Void, Bar> {
 	 * Process published swing worker event
 	 */
 	@Override
-	protected void process(List<Bar> bars) {
+	protected synchronized void process(List<Bar> bars) {
 		// Fire last bar added event. Bars is always not empty
 		Bar bar = bars.get(bars.size() - 1);
 		barEventBus.post(bar);
