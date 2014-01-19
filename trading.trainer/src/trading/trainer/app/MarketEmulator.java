@@ -15,6 +15,8 @@ import javax.inject.Named;
 import javax.swing.SwingWorker;
 
 import trading.trainer.model.Bar;
+import trading.trainer.model.Settings;
+import trading.trainer.model.TradingContext;
 
 import com.google.common.eventbus.EventBus;
 
@@ -42,6 +44,12 @@ public class MarketEmulator extends SwingWorker<Void, Bar> {
 	 */
 	@Inject
 	Settings settings;
+
+	/**
+	 * Trading context: account, orders
+	 */
+	@Inject
+	TradingContext tradingContext;
 
 	/**
 	 * Stop signal
@@ -140,6 +148,8 @@ public class MarketEmulator extends SwingWorker<Void, Bar> {
 						.readLine()) {
 					// Parse string in data file
 					Bar bar = parseBar(line);
+					// Store this bar as current in context
+					tradingContext.setLastBar(bar);
 					// publish bar as a swing worker result
 					publish(bar);
 

@@ -1,4 +1,4 @@
-package trading.trainer.app;
+package trading.trainer.model;
 
 import java.io.File;
 import java.io.FileWriter;

@@ -25,8 +25,8 @@ import org.jfree.data.time.ohlc.OHLCSeriesCollection;
 import org.jfree.data.xy.XYDataset;
 
 import trading.trainer.app.MarketEmulator;
-import trading.trainer.app.Settings;
 import trading.trainer.model.Bar;
+import trading.trainer.model.Settings;
 
 import com.google.common.eventbus.Subscribe;
 
