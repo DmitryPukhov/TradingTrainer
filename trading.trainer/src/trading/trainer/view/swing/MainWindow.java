@@ -83,6 +83,16 @@ public class MainWindow {
 	private JLabel lblOrderProfit;
 
 	/**
+	 * Buy order info label
+	 */
+	private JLabel lblBuy;
+
+	/**
+	 * Sell order info label
+	 */
+	private JLabel lblSell;
+
+	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
@@ -256,6 +266,25 @@ public class MainWindow {
 		lblOrderProfit.setFont(new Font("Dialog", Font.BOLD, 24));
 		chartPanel.add(lblOrderProfit);
 
+		// Buy order info label
+		lblBuy = new JLabel("Buy 0");
+		lblBuy.setVisible(false);
+		lblBuy.setForeground(new Color(0, 128, 0));
+		sl_chartPanel.putConstraint(SpringLayout.NORTH, lblBuy, 5,
+				SpringLayout.NORTH, btnBuy);
+		chartPanel.add(lblBuy);
+
+		lblSell = new JLabel("Sell 0");
+		lblSell.setVisible(false);
+		lblSell.setForeground(new Color(255, 0, 0));
+		sl_chartPanel.putConstraint(SpringLayout.EAST, lblSell, -14,
+				SpringLayout.WEST, btnSell);
+		sl_chartPanel.putConstraint(SpringLayout.WEST, lblBuy, 0,
+				SpringLayout.WEST, lblSell);
+		sl_chartPanel.putConstraint(SpringLayout.SOUTH, lblSell, 0,
+				SpringLayout.SOUTH, btnSell);
+		chartPanel.add(lblSell);
+
 		springLayout.putConstraint(SpringLayout.NORTH, priceChart, 71,
 				SpringLayout.NORTH, frmTradingTrainer.getContentPane());
 		springLayout.putConstraint(SpringLayout.WEST, priceChart, 0,
@@ -288,7 +317,7 @@ public class MainWindow {
 	 */
 	@Subscribe
 	public void onOrderOpened(OrderOpenedEvent e) {
-
+		updateView();
 	}
 
 	/**
@@ -323,6 +352,36 @@ public class MainWindow {
 
 		// Order profit
 		updateProfitView();
+
+		// Update order info label
+		updateOrdersInfoView();
+	}
+
+	/**
+	 * Update order label
+	 */
+	private void updateOrdersInfoView() {
+		// Show buy or sell label with orders count
+		int orders = tradingContext.getOpenedOrders().size();
+		switch (tradingContext.getOpenedOrderType()) {
+		case BUY:
+			// Show buy, hide sell
+			lblBuy.setText(String.format("Buy %d", orders));
+			lblBuy.setVisible(true);
+			lblSell.setVisible(false);
+			break;
+		case SELL:
+			// Show sell, hide buy
+			lblSell.setText(String.format("Sell %d", orders));
+			lblSell.setVisible(true);
+			lblBuy.setVisible(false);
+			break;
+		default:
+			// No orders, hide both buy and sell labels
+			lblBuy.setVisible(false);
+			lblSell.setVisible(false);
+			break;
+		}
 	}
 
 	/**
@@ -334,6 +393,15 @@ public class MainWindow {
 			return;
 		}
 		Double profit = tradingService.getOpenedOrdersProfit();
+		// Set label color
+		Color color = Color.BLUE;
+		if (profit > 0) {
+			color = Color.GREEN;
+		} else if (profit < 0) {
+			color = Color.RED;
+		}
+		// Set label
+		lblOrderProfit.setForeground(color);
 		lblOrderProfit.setText(profit.toString());
 	}
 
