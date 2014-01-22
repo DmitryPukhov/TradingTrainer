@@ -7,6 +7,7 @@ import java.awt.SystemColor;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.Calendar;
+import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
@@ -128,6 +129,17 @@ public class PriceChart extends JPanel {
 		FlowLayout flowLayout_2 = (FlowLayout) volumeChartPanel.getLayout();
 		flowLayout_2.setAlignOnBaseline(true);
 		volumeChartPanel.setPreferredSize(new java.awt.Dimension(500, 100));
+	}
+
+	/**
+	 * Add list of bars to the chart
+	 * 
+	 * @param bars
+	 */
+	public void addBars(final List<Bar> bars) {
+		for (Bar bar : bars) {
+			addBar(bar);
+		}
 	}
 
 	/**

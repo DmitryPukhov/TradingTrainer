@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -29,15 +30,20 @@ import com.google.common.eventbus.EventBus;
 @Named
 public class MarketEmulator extends SwingWorker<Void, Bar> {
 
+	/**
+	 * Interval between emulated ticks
+	 */
 	private long intervalMillis;
-	private EventBus barEventBus = new EventBus();
 
 	/**
-	 * @return Guava EventBus for new bar event
+	 * Buffered data file reader
 	 */
-	public EventBus getBarEventBus() {
-		return barEventBus;
-	}
+	private BufferedReader bufferedReader;
+
+	/**
+	 * Guava event bus
+	 */
+	private EventBus barEventBus = new EventBus();
 
 	/**
 	 * Application settings
@@ -57,10 +63,69 @@ public class MarketEmulator extends SwingWorker<Void, Bar> {
 	private boolean stopFlag = false;
 
 	/**
+	 * Swing worker entry method
+	 */
+	@Override
+	protected Void doInBackground() throws Exception {
+		start();
+		return null;
+	}
+
+	/**
+	 * @return Guava EventBus for new bar event
+	 */
+	public EventBus getBarEventBus() {
+		return barEventBus;
+	}
+
+	/**
 	 * @return the tick intervalMillis
 	 */
 	public long getIntervalMillis() {
 		return intervalMillis;
+	}
+
+	/**
+	 * Before start emulation fill initial data window with bars
+	 * 
+	 * @throws FileNotFoundException
+	 */
+	public List<Bar> loadInitialData() {
+		List<Bar> bars = new ArrayList<Bar>();
+		try { // Get the file
+			String filePath = settings.getDataFilePath();
+			File file = new File(filePath);
+			if (file.length() == 0) {
+				return bars;
+			}
+			bufferedReader = new BufferedReader(new FileReader(file));
+
+			// Read bars from csv file
+			int barIndex = 0;
+			int dataSize = settings.getDataWindowSize();
+			String headerLine = bufferedReader.readLine();
+			String line;
+			for (line = bufferedReader.readLine(); line != null
+					&& barIndex < dataSize - 1; line = bufferedReader
+					.readLine()) {
+				// Parse string to bar
+				Bar bar = parseBar(line);
+				// barEventBus.post(bar);
+				bars.add(bar);
+				barIndex++;
+			}
+
+			// Add last line
+			Bar bar = parseBar(line);
+			bars.add(bar);
+
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		return bars;
 	}
 
 	/**
@@ -122,6 +187,16 @@ public class MarketEmulator extends SwingWorker<Void, Bar> {
 	}
 
 	/**
+	 * Process published swing worker event
+	 */
+	@Override
+	protected synchronized void process(List<Bar> bars) {
+		// Fire last bar added event. Bars is always not empty
+		Bar bar = bars.get(bars.size() - 1);
+		barEventBus.post(bar);
+	}
+
+	/**
 	 * @param intervalMillis
 	 *            the tick intervalMillis to set
 	 */
@@ -137,29 +212,33 @@ public class MarketEmulator extends SwingWorker<Void, Bar> {
 		stopFlag = false;
 		String filePath = settings.getDataFilePath();
 		File file = new File(filePath);
-		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+		if (file.length() == 0) {
+			return;
+		}
+
+		try {
+
 			// Skip header first
-			String headerLine = reader.readLine();
+			// String headerLine = bufferedReader.readLine();
 
-			if (headerLine != null) {
-				// Read bar line from csv file, convert it to bar and
-				// fire event
-				for (String line = reader.readLine(); line != null && !stopFlag; line = reader
-						.readLine()) {
-					// Parse string in data file
-					Bar bar = parseBar(line);
-					// Store this bar as current in context
-					tradingContext.setLastBar(bar);
-					// publish bar as a swing worker result
-					publish(bar);
+			// Read bar line from csv file, convert it to bar and
+			// fire event
+			for (String line = bufferedReader.readLine(); line != null
+					&& !stopFlag; line = bufferedReader.readLine()) {
+				// Parse string in data file
+				Bar bar = parseBar(line);
+				// Store this bar as current in context
+				tradingContext.setLastBar(bar);
+				// publish bar as a swing worker result
+				publish(bar);
 
-					// Delay before next bar if first bars already passed
-					int intervalMillis = settings.getTickIntervalSeconds() * 1000;
-					if (intervalMillis > 0) {
-						Thread.sleep(intervalMillis);
-					}
+				// Delay before next bar if first bars already passed
+				int intervalMillis = settings.getTickIntervalSeconds() * 1000;
+				if (intervalMillis > 0) {
+					Thread.sleep(intervalMillis);
 				}
 			}
+
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e1) {
@@ -175,24 +254,5 @@ public class MarketEmulator extends SwingWorker<Void, Bar> {
 	 */
 	public void stop() {
 		stopFlag = true;
-	}
-
-	/**
-	 * Swing worker entry method
-	 */
-	@Override
-	protected Void doInBackground() throws Exception {
-		start();
-		return null;
-	}
-
-	/**
-	 * Process published swing worker event
-	 */
-	@Override
-	protected synchronized void process(List<Bar> bars) {
-		// Fire last bar added event. Bars is always not empty
-		Bar bar = bars.get(bars.size() - 1);
-		barEventBus.post(bar);
 	}
 }

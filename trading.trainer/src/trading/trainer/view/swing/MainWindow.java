@@ -5,6 +5,8 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileNotFoundException;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -304,8 +306,12 @@ public class MainWindow {
 
 	/**
 	 * Run market emulator
+	 * 
+	 * @throws FileNotFoundException
 	 */
 	private void startMarketEmulator() {
+		List<Bar> initialBars = marketEmulator.loadInitialData();
+		priceChart.addBars(initialBars);
 		marketEmulator.execute();
 	}
 
