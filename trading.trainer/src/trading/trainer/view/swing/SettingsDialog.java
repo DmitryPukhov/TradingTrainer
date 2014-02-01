@@ -218,8 +218,7 @@ public class SettingsDialog extends JDialog {
 
 		// Update view from settings
 		txtFilePath.setText(settings.getDataFilePath());
-		txtDataWindowSize.setText(new Integer(settings.getDataWindowSize())
-				.toString());
+		txtDataWindowSize.setText(String.valueOf(settings.getDataWindowSize()));
 		chckbxRandomStartPosition.setSelected(settings.getRandomStart());
 	}
 
