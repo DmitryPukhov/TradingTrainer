@@ -4,24 +4,11 @@
 	<groupId>trading.trainer</groupId>
 	<artifactId>trading.trainer</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<build>
-		<sourceDirectory>src</sourceDirectory>
-		<!-- <plugins> -->
-		<!-- <plugin> -->
-		<!-- <artifactId>maven-compiler-plugin</artifactId> -->
-		<!-- <version>3.1</version> -->
-		<!-- <configuration> -->
-		<!-- <source>1.8</source> -->
-		<!-- <target>1.8</target> -->
-		<!-- </configuration> -->
-		<!-- </plugin> -->
-		<!-- </plugins> -->
-	</build>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
-			<version>3.2.3.RELEASE</version>
+			<version>4.0.1.RELEASE</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.inject</groupId>
@@ -48,6 +35,22 @@
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>
 			<version>2.3</version>
-		</dependency>		
+		</dependency>
 	</dependencies>
+
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.1</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
 </project>
